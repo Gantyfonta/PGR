@@ -6,7 +6,7 @@ const BASE_ROTATION_SPEED = 2.2;
 const MIN_RANDOM_SPEED = 2.2;
 const MAX_SPEED_CAP = 9.0;
 const COLLISION_ANGLE_CENTER = 180;
-const COLLISION_ANGLE_WINDOW = 15;
+const COLLISION_ANGLE_WINDOW = 16; // Slightly larger for better feel
 const MIN_JUMP_HEIGHT = 48;
 
 // --- State Management ---
@@ -27,75 +27,63 @@ class AudioService {
         return this.ctx;
     }
     playJump() {
-        const ctx = this.getCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.1);
+        try {
+            const ctx = this.getCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.1);
+        } catch (e) {}
     }
     playScore() {
-        const ctx = this.getCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.3);
+        try {
+            const ctx = this.getCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.3);
+        } catch (e) {}
     }
     playGameOver() {
-        const ctx = this.getCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.5);
+        try {
+            const ctx = this.getCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + 0.5);
+        } catch (e) {}
     }
 }
 const audio = new AudioService();
 
-// --- Local Commentary Quotes ---
-const QUOTES_LOW = [
-    "Ouch! Watch the clock, piggy!",
-    "Rhythm is hard, huh?",
-    "Bacon's on the menu today!",
-    "Step it up, squealer!",
-    "A bit flat on that one."
-];
-const QUOTES_MID = [
-    "Not bad, piggy!",
-    "You've got some moves!",
-    "Keeping it steady!",
-    "Feeling the beat!",
-    "Nice hops!"
-];
-const QUOTES_HIGH = [
-    "Absolute LEGEND!",
-    "Piggy's got the funk!",
-    "Unstoppable rhythm!",
-    "The DJ is impressed!",
-    "Pure poetry in motion!"
-];
+// --- Commentary Logic ---
+const QUOTES_LOW = ["Ouch! Watch the clock!", "Rhythm is hard!", "Bacon time?", "Wake up, piggy!", "A bit late!"];
+const QUOTES_MID = ["Nice hops!", "Piggy's got moves!", "Steady rhythm!", "Feeling the beat!", "Great timing!"];
+const QUOTES_HIGH = ["LEGENDARY PIG!", "Rhythm Master!", "Unstoppable!", "DJ Piggy in the house!", "Master of Time!"];
 
-function getCommentary(score: number) {
-    if (score === 0) return "Did you even try? Get hopping!";
-    if (score < 5) return QUOTES_LOW[Math.floor(Math.random() * QUOTES_LOW.length)];
-    if (score < 15) return QUOTES_MID[Math.floor(Math.random() * QUOTES_MID.length)];
+function getCommentary(s: number) {
+    if (s === 0) return "Jump over the hand to start!";
+    if (s < 5) return QUOTES_LOW[Math.floor(Math.random() * QUOTES_LOW.length)];
+    if (s < 15) return QUOTES_MID[Math.floor(Math.random() * QUOTES_MID.length)];
     return QUOTES_HIGH[Math.floor(Math.random() * QUOTES_HIGH.length)];
 }
 
-// --- DOM Elements ---
+// --- DOM References ---
 const el = {
     container: document.getElementById('game-container'),
     highScore: document.getElementById('high-score'),
@@ -118,27 +106,30 @@ const el = {
     popupLayer: document.getElementById('score-popup-layer')
 };
 
-// Initialize Clock Markers
-for (let i = 0; i < 12; i++) {
-    const marker = document.createElement('div');
-    marker.className = 'absolute w-2 h-6 bg-slate-300 rounded-full';
-    marker.style.transform = `rotate(${i * 30}deg) translateY(-150px)`;
-    marker.style.transformOrigin = 'center center';
-    el.clockFace?.appendChild(marker);
-}
-el.highScore!.innerText = highScore.toString();
+// --- Initialization ---
+const setupClock = () => {
+    for (let i = 0; i < 12; i++) {
+        const marker = document.createElement('div');
+        marker.className = 'absolute w-2 h-6 bg-slate-200 rounded-full';
+        marker.style.transform = `rotate(${i * 30}deg) translateY(-150px)`;
+        marker.style.transformOrigin = 'center center';
+        el.clockFace?.appendChild(marker);
+    }
+    el.highScore!.innerText = highScore.toString();
+};
+setupClock();
 
-// --- Game Logic ---
+// --- Game Loop ---
 function update() {
     if (gameState !== 'PLAYING') return;
 
-    // 1. Hand Rotation
+    // 1. Clock Physics
     const prevAngle = handAngle;
     handAngle = (handAngle + currentSpeed) % 360;
     el.hand!.style.transform = `rotate(${handAngle}deg)`;
 
-    // Beat glow at 12 o'clock
-    if (handAngle < 20) el.beatGlow!.style.opacity = '0.4';
+    // Visual Beat Feedback
+    if (handAngle < 15 || handAngle > 345) el.beatGlow!.style.opacity = '0.3';
     else el.beatGlow!.style.opacity = '0';
 
     // 2. Pig Physics
@@ -149,57 +140,57 @@ function update() {
         pigVel = 0;
     }
 
-    // 3. Render Pig
+    // 3. Render Pig & Shadow
     const renderY = -pigY;
     el.pigWrapper!.style.transform = `translateX(-50%) translateY(${pigY}px)`;
     
-    // Squash & Stretch
-    const stretch = renderY > 0 ? 1.1 : 1.0;
-    const squash = renderY === 0 ? 0.95 : 1.0;
+    // Squash & Stretch Logic
+    const stretch = renderY > 0 ? 1.15 : 1.0;
+    const squash = renderY === 0 ? 0.9 : 1.0;
     el.pigBody!.style.transform = `scaleX(${1 / stretch * squash}) scaleY(${stretch})`;
     
-    // Shadow
-    const shadowScale = Math.max(0.5, 1 - (renderY / 150));
-    const shadowOpacity = Math.max(0.1, 0.4 - (renderY / 100));
+    // Shadow Physics (Stays fixed relative to bottom, but scales)
+    const shadowScale = Math.max(0.4, 1 - (renderY / 180));
+    const shadowOpacity = Math.max(0.1, 0.3 - (renderY / 200));
     el.pigShadow!.style.transform = `scale(${shadowScale})`;
     el.pigShadow!.style.opacity = shadowOpacity.toString();
-    el.pigShadow!.style.bottom = `${renderY}px`;
+    // Adjust shadow position slightly to keep it "under" the pig
+    el.pigShadow!.style.bottom = `${-renderY - 8}px`; 
 
-    // 4. Collision
+    // 4. Hitbox Collision (Sweep Detection)
     const dangerZoneStart = COLLISION_ANGLE_CENTER - COLLISION_ANGLE_WINDOW;
     const dangerZoneEnd = COLLISION_ANGLE_CENTER + COLLISION_ANGLE_WINDOW;
+    
     const isCurrentlyInDanger = handAngle >= dangerZoneStart && handAngle <= dangerZoneEnd;
-    const didPassThroughDanger = prevAngle < dangerZoneStart && handAngle > dangerZoneEnd;
+    const crossedDanger = prevAngle < dangerZoneStart && handAngle > dangerZoneStart;
 
-    if ((isCurrentlyInDanger || didPassThroughDanger) && (renderY < MIN_JUMP_HEIGHT)) {
+    if ((isCurrentlyInDanger || crossedDanger) && (renderY < MIN_JUMP_HEIGHT)) {
         endGame();
         return;
     }
 
-    // 5. Scoring
+    // 5. Scoring (Passing 6 o'clock)
     if (prevAngle < 180 && handAngle >= 180) {
         audio.playScore();
         score++;
         el.currentScore!.innerText = score.toString();
         
-        // Pop effect
+        // Popup FX
         const pop = document.createElement('div');
         pop.className = 'absolute text-5xl font-game text-pink-500 score-pop';
         pop.innerText = '+1';
         el.popupLayer!.appendChild(pop);
         setTimeout(() => pop.remove(), 500);
 
-        // Randomize speed
-        if (score >= 1) {
-            const diff = Math.min(MAX_SPEED_CAP, BASE_ROTATION_SPEED + (score * 0.35));
-            currentSpeed = MIN_RANDOM_SPEED + Math.random() * (diff - MIN_RANDOM_SPEED);
-            
-            el.speedLabel!.classList.remove('hidden');
-            if (currentSpeed > 7) el.speedLabel!.innerText = 'TURBO!';
-            else if (currentSpeed > 5) el.speedLabel!.innerText = 'FAST';
-            else if (currentSpeed < 3) el.speedLabel!.innerText = 'SLOW MO';
-            else el.speedLabel!.innerText = 'STEADY';
-        }
+        // Speed Progression
+        const diff = Math.min(MAX_SPEED_CAP, BASE_ROTATION_SPEED + (score * 0.38));
+        currentSpeed = MIN_RANDOM_SPEED + Math.random() * (diff - MIN_RANDOM_SPEED);
+        
+        el.speedLabel!.classList.remove('hidden');
+        if (currentSpeed > 7.5) el.speedLabel!.innerText = 'TURBO!';
+        else if (currentSpeed > 5.5) el.speedLabel!.innerText = 'FAST';
+        else if (currentSpeed < 3) el.speedLabel!.innerText = 'CHILL';
+        else el.speedLabel!.innerText = 'STEADY';
     }
 
     animationId = requestAnimationFrame(update);
@@ -218,9 +209,9 @@ function startGame() {
     el.hud!.classList.remove('opacity-0', 'scale-50');
     el.hud!.classList.add('opacity-100', 'scale-100');
     el.container!.classList.replace('bg-menu', 'bg-playing');
-    el.footerHint!.innerText = 'Press Space or Tap to Jump';
+    el.footerHint!.innerText = 'Tap or Space to Jump';
     el.speedLabel!.classList.add('hidden');
-    el.pigBody!.classList.remove('rotate-90', 'bg-pink-300');
+    el.pigBody!.classList.remove('rotate-90', 'grayscale', 'opacity-50');
     
     if (animationId) cancelAnimationFrame(animationId);
     update();
@@ -238,7 +229,7 @@ function endGame() {
     }
 
     el.lastScore!.innerText = score.toString();
-    el.pigBody!.classList.add('rotate-90', 'bg-pink-300');
+    el.pigBody!.classList.add('rotate-90', 'grayscale', 'opacity-50');
     el.menuOverlay!.classList.remove('hidden');
     el.startContent!.classList.add('hidden');
     el.gameoverContent!.classList.remove('hidden');
@@ -250,7 +241,7 @@ function endGame() {
 
 function handleJump() {
     if (gameState === 'PLAYING') {
-        if (pigY >= -5) {
+        if (pigY >= -8) { // Coyote-time / Forgiveness buffer
             audio.playJump();
             pigVel = JUMP_FORCE;
         }
@@ -259,7 +250,7 @@ function handleJump() {
     }
 }
 
-// Events
+// --- Event Listeners ---
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();

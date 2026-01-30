@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Pig Got Rhythm</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐷</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -14,6 +15,7 @@
             margin: 0;
             overflow: hidden;
             touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .font-game {
             font-family: 'Fredoka One', cursive;
@@ -26,11 +28,19 @@
         
         /* Animations */
         @keyframes score-pop {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
+            0% { transform: scale(1); opacity: 1; translateY(0); }
+            100% { transform: scale(2); opacity: 0; translateY(-40px); }
         }
         .score-pop {
             animation: score-pop 0.5s ease-out forwards;
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .pulse-soft {
+            animation: pulse-soft 2s infinite ease-in-out;
         }
     </style>
 </head>
@@ -59,7 +69,7 @@
             <!-- Clock -->
             <div id="clock-face" class="relative w-80 h-80 md:w-[450px] md:h-[450px] bg-white rounded-full border-[12px] border-slate-800 shadow-2xl flex items-center justify-center">
                 <!-- Markers added via JS -->
-                <div class="z-20 w-8 h-8 bg-slate-800 rounded-full shadow-md"></div>
+                <div class="z-20 w-8 h-8 bg-slate-800 rounded-full shadow-md pulse-soft"></div>
                 <!-- Hand -->
                 <div id="clock-hand" class="absolute z-10 w-3 bg-slate-800 rounded-full shadow-lg origin-bottom" style="height: 45%; bottom: 50%; transform: rotate(0deg);">
                     <div class="w-5 h-5 bg-red-500 rounded-full absolute -top-2 -left-1 shadow-sm border-2 border-slate-800"></div>
@@ -70,7 +80,7 @@
             <div id="pig-container" class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible">
                 <div id="pig-wrapper" class="absolute flex flex-col items-center" style="bottom: 8%; left: 50%; transform: translateX(-50%); z-index: 50;">
                     <!-- Pig Body -->
-                    <div id="pig-body" class="w-16 h-16 bg-pink-400 rounded-full border-4 border-pink-600 relative shadow-md transition-transform duration-100">
+                    <div id="pig-body" class="w-16 h-16 bg-pink-400 rounded-full border-4 border-pink-600 relative shadow-md transition-transform duration-75">
                         <div class="absolute -top-2 -left-1 w-4 h-4 bg-pink-400 border-2 border-pink-600 rounded-tl-xl rotate-[-20deg]"></div>
                         <div class="absolute -top-2 -right-1 w-4 h-4 bg-pink-400 border-2 border-pink-600 rounded-tr-xl rotate-[20deg]"></div>
                         <div class="absolute top-1/3 left-1/4 w-2 h-2 bg-black rounded-full"></div>
@@ -80,7 +90,7 @@
                             <div class="w-1 h-1 bg-pink-600 rounded-full"></div>
                         </div>
                     </div>
-                    <!-- Shadow -->
+                    <!-- Shadow (Stays on ground) -->
                     <div id="pig-shadow" class="absolute -bottom-2 w-12 h-3 bg-black/20 rounded-full blur-[2px] transition-all"></div>
                 </div>
             </div>
@@ -91,7 +101,7 @@
                     <div id="start-content">
                         <div class="text-6xl mb-4 animate-bounce">🐷</div>
                         <h2 class="text-4xl font-game text-slate-800 mb-2">Ready?</h2>
-                        <p class="text-slate-500 mb-8 text-lg font-medium leading-tight">Jump over the clock hand to keep the rhythm!</p>
+                        <p class="text-slate-500 mb-8 text-lg font-medium leading-tight">Wait for the hand to point down, then jump!</p>
                     </div>
                     <div id="gameover-content" class="hidden">
                         <h2 class="text-3xl font-game text-red-500 mb-1">CRACKLED!</h2>
@@ -120,7 +130,7 @@
 
         <!-- Footer -->
         <div class="z-10 mt-auto pb-10 flex flex-col items-center gap-2">
-            <p id="footer-hint" class="text-slate-400 font-bold uppercase tracking-widest text-xs">Jump to Play</p>
+            <p id="footer-hint" class="text-slate-400 font-bold uppercase tracking-widest text-xs">Tap or Space to Play</p>
         </div>
     </div>
 </body>
