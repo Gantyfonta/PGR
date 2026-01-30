@@ -18,7 +18,7 @@ let pigY = 0;
 let pigVel = 0;
 let currentSpeed = BASE_ROTATION_SPEED;
 let animationId: number | null = null;
-let el: any = {}; // Late-initialized DOM elements
+let el: any = {};
 
 // --- Audio Service ---
 class AudioService {
@@ -29,7 +29,7 @@ class AudioService {
             this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         }
         if (this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            this.ctx.resume().catch(() => {});
         }
         return this.ctx;
     }
@@ -100,11 +100,13 @@ function update() {
     // 1. Clock Physics
     const prevAngle = handAngle;
     handAngle = (handAngle + currentSpeed) % 360;
-    el.hand.style.transform = `rotate(${handAngle}deg)`;
+    if (el.hand) el.hand.style.transform = `rotate(${handAngle}deg)`;
 
     // Visual Beat Feedback
-    if (handAngle < 15 || handAngle > 345) el.beatGlow.style.opacity = '0.3';
-    else el.beatGlow.style.opacity = '0';
+    if (el.beatGlow) {
+        if (handAngle < 15 || handAngle > 345) el.beatGlow.style.opacity = '0.3';
+        else el.beatGlow.style.opacity = '0';
+    }
 
     // 2. Pig Physics
     pigY += pigVel;
@@ -116,16 +118,20 @@ function update() {
 
     // 3. Render Pig & Shadow
     const renderY = -pigY;
-    el.pigWrapper.style.transform = `translateX(-50%) translateY(${pigY}px)`;
+    if (el.pigWrapper) el.pigWrapper.style.transform = `translateX(-50%) translateY(${pigY}px)`;
     
-    const stretch = renderY > 0 ? 1.15 : 1.0;
-    const squash = renderY === 0 ? 0.9 : 1.0;
-    el.pigBody.style.transform = `scaleX(${1 / stretch * squash}) scaleY(${stretch})`;
+    if (el.pigBody) {
+        const stretch = renderY > 0 ? 1.15 : 1.0;
+        const squash = renderY === 0 ? 0.9 : 1.0;
+        el.pigBody.style.transform = `scaleX(${1 / stretch * squash}) scaleY(${stretch})`;
+    }
     
-    const shadowScale = Math.max(0.4, 1 - (renderY / 180));
-    const shadowOpacity = Math.max(0.1, 0.3 - (renderY / 200));
-    el.pigShadow.style.transform = `scale(${shadowScale})`;
-    el.pigShadow.style.opacity = shadowOpacity.toString();
+    if (el.pigShadow) {
+        const shadowScale = Math.max(0.4, 1 - (renderY / 180));
+        const shadowOpacity = Math.max(0.1, 0.3 - (renderY / 200));
+        el.pigShadow.style.transform = `scale(${shadowScale})`;
+        el.pigShadow.style.opacity = shadowOpacity.toString();
+    }
 
     // 4. Hitbox Collision
     const dangerZoneStart = COLLISION_ANGLE_CENTER - COLLISION_ANGLE_WINDOW;
@@ -143,24 +149,28 @@ function update() {
     if (prevAngle < 180 && handAngle >= 180) {
         audio.playScore();
         score++;
-        el.currentScore.innerText = score.toString();
+        if (el.currentScore) el.currentScore.innerText = score.toString();
         
         // Popup FX
-        const pop = document.createElement('div');
-        pop.className = 'absolute text-5xl font-game text-pink-500 score-pop';
-        pop.innerText = '+1';
-        el.popupLayer.appendChild(pop);
-        setTimeout(() => pop.remove(), 600);
+        if (el.popupLayer) {
+            const pop = document.createElement('div');
+            pop.className = 'absolute text-5xl font-game text-pink-500 score-pop';
+            pop.innerText = '+1';
+            el.popupLayer.appendChild(pop);
+            setTimeout(() => pop.remove(), 600);
+        }
 
         // Speed Progression
         const diff = Math.min(MAX_SPEED_CAP, BASE_ROTATION_SPEED + (score * 0.38));
         currentSpeed = MIN_RANDOM_SPEED + Math.random() * (diff - MIN_RANDOM_SPEED);
         
-        el.speedLabel.classList.remove('hidden');
-        if (currentSpeed > 7.5) el.speedLabel.innerText = 'TURBO!';
-        else if (currentSpeed > 5.5) el.speedLabel.innerText = 'FAST';
-        else if (currentSpeed < 3) el.speedLabel.innerText = 'CHILL';
-        else el.speedLabel.innerText = 'STEADY';
+        if (el.speedLabel) {
+            el.speedLabel.classList.remove('hidden');
+            if (currentSpeed > 7.5) el.speedLabel.innerText = 'TURBO!';
+            else if (currentSpeed > 5.5) el.speedLabel.innerText = 'FAST';
+            else if (currentSpeed < 3) el.speedLabel.innerText = 'CHILL';
+            else el.speedLabel.innerText = 'STEADY';
+        }
     }
 
     animationId = requestAnimationFrame(update);
@@ -174,14 +184,16 @@ function startGame() {
     pigVel = 0;
     currentSpeed = BASE_ROTATION_SPEED;
     
-    el.currentScore.innerText = '0';
-    el.menuOverlay.classList.add('hidden');
-    el.hud.classList.remove('opacity-0', 'scale-50');
-    el.hud.classList.add('opacity-100', 'scale-100');
-    el.container.classList.replace('bg-menu', 'bg-playing');
-    el.footerHint.innerText = 'Tap or Space to Jump';
-    el.speedLabel.classList.add('hidden');
-    el.pigBody.classList.remove('rotate-90', 'grayscale', 'opacity-50');
+    if (el.currentScore) el.currentScore.innerText = '0';
+    if (el.menuOverlay) el.menuOverlay.classList.add('hidden');
+    if (el.hud) {
+        el.hud.classList.remove('opacity-0', 'scale-50');
+        el.hud.classList.add('opacity-100', 'scale-100');
+    }
+    if (el.container) el.container.classList.replace('bg-menu', 'bg-playing');
+    if (el.footerHint) el.footerHint.innerText = 'Tap or Space to Jump';
+    if (el.speedLabel) el.speedLabel.classList.add('hidden');
+    if (el.pigBody) el.pigBody.classList.remove('rotate-90', 'grayscale', 'opacity-50');
     
     if (animationId) cancelAnimationFrame(animationId);
     update();
@@ -195,18 +207,18 @@ function endGame() {
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('pig-rhythm-highscore', highScore.toString());
-        el.highScore.innerText = highScore.toString();
+        if (el.highScore) el.highScore.innerText = highScore.toString();
     }
 
-    el.lastScore.innerText = score.toString();
-    el.pigBody.classList.add('rotate-90', 'grayscale', 'opacity-50');
-    el.menuOverlay.classList.remove('hidden');
-    el.startContent.classList.add('hidden');
-    el.gameoverContent.classList.remove('hidden');
-    el.startButton.innerText = 'TRY AGAIN';
-    el.footerHint.innerText = 'Jump to Restart';
+    if (el.lastScore) el.lastScore.innerText = score.toString();
+    if (el.pigBody) el.pigBody.classList.add('rotate-90', 'grayscale', 'opacity-50');
+    if (el.menuOverlay) el.menuOverlay.classList.remove('hidden');
+    if (el.startContent) el.startContent.classList.add('hidden');
+    if (el.gameoverContent) el.gameoverContent.classList.remove('hidden');
+    if (el.startButton) el.startButton.innerText = 'TRY AGAIN';
+    if (el.footerHint) el.footerHint.innerText = 'Jump to Restart';
     
-    el.commentaryText.innerText = `"${getCommentary(score)}"`;
+    if (el.commentaryText) el.commentaryText.innerText = `"${getCommentary(score)}"`;
 }
 
 function handleJump() {
@@ -222,7 +234,7 @@ function handleJump() {
 
 // --- Initialization Logic ---
 function init() {
-    // Map DOM elements after they exist
+    // Map DOM elements
     el = {
         container: document.getElementById('game-container'),
         highScore: document.getElementById('high-score'),
@@ -245,20 +257,18 @@ function init() {
         popupLayer: document.getElementById('score-popup-layer')
     };
 
-    // Verify all elements found
-    for (let key in el) {
-        if (!el[key]) console.warn(`Element missing: ${key}`);
-    }
-
     // Initialize Clock Markers
-    for (let i = 0; i < 12; i++) {
-        const marker = document.createElement('div');
-        marker.className = 'absolute w-2 h-6 bg-slate-200 rounded-full';
-        marker.style.transform = `rotate(${i * 30}deg) translateY(-150px)`;
-        marker.style.transformOrigin = 'center center';
-        el.clockFace.appendChild(marker);
+    if (el.clockFace) {
+        for (let i = 0; i < 12; i++) {
+            const marker = document.createElement('div');
+            marker.className = 'absolute w-2 h-6 bg-slate-200 rounded-full';
+            marker.style.transform = `rotate(${i * 30}deg) translateY(-150px)`;
+            marker.style.transformOrigin = 'center center';
+            el.clockFace.appendChild(marker);
+        }
     }
-    el.highScore.innerText = highScore.toString();
+    
+    if (el.highScore) el.highScore.innerText = highScore.toString();
 
     // Setup Global Listeners
     window.addEventListener('keydown', (e) => {
@@ -268,18 +278,22 @@ function init() {
         }
     });
 
-    el.container.addEventListener('pointerdown', (e) => {
-        if (e.target instanceof HTMLButtonElement) return;
-        handleJump();
-    });
+    if (el.container) {
+        el.container.addEventListener('pointerdown', (e) => {
+            if (e.target instanceof HTMLButtonElement) return;
+            handleJump();
+        });
+    }
 
-    el.startButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startGame();
-    });
+    if (el.startButton) {
+        el.startButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            startGame();
+        });
+    }
 }
 
-// Run init when DOM is ready
+// Robust execution trigger
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {

@@ -26,7 +26,6 @@
         .bg-playing { background-color: #fdf2f8; }
         .bg-menu { background-color: #f1f5f9; }
         
-        /* Animations */
         @keyframes score-pop {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(2.5); opacity: 0; }
@@ -48,7 +47,7 @@
 </head>
 <body>
     <div id="game-container" class="relative flex flex-col items-center justify-center min-h-screen p-4 select-none bg-menu">
-        <!-- Beat Glow (Flash on rhythm) -->
+        <!-- Beat Glow -->
         <div id="beat-glow" class="absolute inset-0 bg-white opacity-0 transition-opacity duration-150 pointer-events-none -z-10"></div>
 
         <!-- Header -->
@@ -70,7 +69,6 @@
         <div class="relative z-10 flex items-center justify-center">
             <!-- Clock -->
             <div id="clock-face" class="relative w-80 h-80 md:w-[450px] md:h-[450px] bg-white rounded-full border-[12px] border-slate-800 shadow-2xl flex items-center justify-center">
-                <!-- Center Pivot -->
                 <div class="z-20 w-8 h-8 bg-slate-800 rounded-full shadow-md pulse-soft"></div>
                 <!-- Hand -->
                 <div id="clock-hand" class="absolute z-10 w-3 bg-slate-800 rounded-full shadow-lg origin-bottom" style="height: 45%; bottom: 50%; transform: rotate(0deg);">
@@ -81,20 +79,16 @@
             <!-- Pig Container -->
             <div id="pig-container" class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible">
                 <div id="pig-wrapper" class="absolute flex flex-col items-center" style="bottom: 8%; left: 50%; transform: translateX(-50%); z-index: 50;">
-                    <!-- Pig Body -->
                     <div id="pig-body" class="w-16 h-16 bg-pink-400 rounded-full border-4 border-pink-600 relative shadow-md transition-transform duration-75">
                         <div class="absolute -top-2 -left-1 w-4 h-4 bg-pink-400 border-2 border-pink-600 rounded-tl-xl rotate-[-20deg]"></div>
                         <div class="absolute -top-2 -right-1 w-4 h-4 bg-pink-400 border-2 border-pink-600 rounded-tr-xl rotate-[20deg]"></div>
-                        <!-- Eyes -->
                         <div class="absolute top-1/3 left-1/4 w-2 h-2 bg-black rounded-full"></div>
                         <div class="absolute top-1/3 right-1/4 w-2 h-2 bg-black rounded-full"></div>
-                        <!-- Snout -->
                         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 w-8 h-6 bg-pink-300 border-2 border-pink-500 rounded-full flex justify-center items-center gap-1">
                             <div class="w-1 h-1 bg-pink-600 rounded-full"></div>
                             <div class="w-1 h-1 bg-pink-600 rounded-full"></div>
                         </div>
                     </div>
-                    <!-- Shadow -->
                     <div id="pig-shadow" class="absolute -bottom-2 w-12 h-3 bg-black/20 rounded-full blur-[2px] transition-all"></div>
                 </div>
             </div>
@@ -137,8 +131,5 @@
             <p id="footer-hint" class="text-slate-400 font-bold uppercase tracking-widest text-xs">Tap or Space to Play</p>
         </div>
     </div>
-    
-    <!-- ES Module Game Logic -->
-    <script type="module" src="index.tsx"></script>
 </body>
 </html>
